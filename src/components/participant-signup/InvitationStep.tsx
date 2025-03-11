@@ -4,6 +4,7 @@ import { ParticipantInfo, StudyInfo } from './types';
 import { Check, Send } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 interface InvitationStepProps {
   onComplete: () => void;
@@ -20,6 +21,14 @@ export const InvitationStep: React.FC<InvitationStepProps> = ({
 }) => {
   const [showContent, setShowContent] = useState(false);
   const [heightAnimationComplete, setHeightAnimationComplete] = useState(false);
+  const [gradientImage, setGradientImage] = useState<number>(1);
+  const [imageAnimationReady, setImageAnimationReady] = useState(false);
+  
+  // Select a random gradient image on component mount
+  useEffect(() => {
+    const randomGradient = Math.floor(Math.random() * 3) + 1;
+    setGradientImage(randomGradient);
+  }, []);
   
   // Show content after a short delay for the animation to be visible
   useEffect(() => {
@@ -29,6 +38,17 @@ export const InvitationStep: React.FC<InvitationStepProps> = ({
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Trigger image animation after height animation completes
+  useEffect(() => {
+    if (heightAnimationComplete) {
+      const timer = setTimeout(() => {
+        setImageAnimationReady(true);
+      }, 200); // Small delay before starting image animation
+      
+      return () => clearTimeout(timer);
+    }
+  }, [heightAnimationComplete]);
 
   // Container variants for staggered children
   const containerVariants = {
@@ -56,10 +76,42 @@ export const InvitationStep: React.FC<InvitationStepProps> = ({
     }
   };
 
+  // Gradient image animation variants
+  const gradientVariants = {
+    hidden: { opacity: 0},
+    visible: {
+      opacity: 1,
+      transition: {
+        delay: 0.5,
+        duration: 2.5,
+        ease: "easeOut"
+      }
+    }
+  };
+
   return (
     <div className="relative">
+      {/* Gradient background */}
+      <div className="absolute -top-20 left-0 w-full h-[60%] overflow-hidden z-0">
+        <motion.div 
+          className="relative w-full aspect-[1.84/1]"
+          variants={gradientVariants}
+          initial="hidden"
+          animate={imageAnimationReady ? "visible" : "hidden"}
+        >
+          <Image 
+            src={`/gradients/${gradientImage}.jpg`}
+            width={1000}
+            height={1000}
+            alt="Background gradient"
+            priority
+            className="object-fill"
+          />
+        </motion.div>
+      </div>
+      
       <motion.div 
-        className="overflow-hidden w-full"
+        className="overflow-hidden w-full relative z-10"
         initial={{ height: "500px" }}
         animate={{ height: showContent ? "auto" : "500px" }}
         transition={{ 
@@ -79,8 +131,8 @@ export const InvitationStep: React.FC<InvitationStepProps> = ({
               {/* Header with success message */}
               <motion.div variants={childVariants} className="flex flex-col w-full text-center gap-8">
                 <div className="flex flex-col gap-2">
-                  <h2 className="text-2xl font-semibold">Participant Added</h2>
-                  <p className="text-sm text-gray-400 dark:text-gray-300">
+                  <h2 className="text-3xl font-semibold">Participant Added</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-300">
                     {studyInfo.isDataCollection 
                       ? "You're one step closer to collecting results."
                       : "Participant information has now been stored"}
