@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import { Button } from '@/components/Button';
 import { FormComponent } from '@/components/FormComponent';
 import { MinorInfoPage } from './MinorInfoPage';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 // Custom animation variants for this step
 const fadeVariants = {
@@ -29,7 +35,7 @@ interface IsMinorStepProps {
 
 export const IsMinorStep: React.FC<IsMinorStepProps> = ({ onNext }) => {
   const [showMinorInfo, setShowMinorInfo] = useState(false);
-  
+
   // Create handlers for the buttons
   const handleAdultSelect = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +45,7 @@ export const IsMinorStep: React.FC<IsMinorStepProps> = ({ onNext }) => {
   const handleMinorSelect = () => {
     setShowMinorInfo(true);
   };
-  
+
   const handleBackFromMinorInfo = () => {
     setShowMinorInfo(false);
   };
@@ -74,6 +80,17 @@ export const IsMinorStep: React.FC<IsMinorStepProps> = ({ onNext }) => {
               Participant is less than 13 years old
             </Button>
           </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger className="text-xs font-medium text-blue-600 text-center">Why does this matter?</TooltipTrigger>
+              <TooltipContent className="text-center">
+                <p>Participants under 13 are not able to consent to the use of their data in this study.
+                  <br />
+                  They require parental consent to participate.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       ) : (
         <MinorInfoPage onBack={handleBackFromMinorInfo} />
