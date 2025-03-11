@@ -112,8 +112,8 @@ export const InvitationStep: React.FC<InvitationStepProps> = ({
       
       <motion.div 
         className="overflow-hidden w-full relative z-10"
-        initial={{ height: "500px" }}
-        animate={{ height: showContent ? "auto" : "500px" }}
+        initial={{ height: "600px" }}
+        animate={{ height: showContent ? "auto" : "600px" }}
         transition={{ 
           duration: 0.5,
           ease: "easeInOut"

@@ -87,6 +87,7 @@ export const AdultInfoStep: React.FC<AdultInfoStepProps> = ({
             onBack={onBack}
             animationKey="adult-info-step"
             validateForm={validateForm}
+            currentStep={1}
         >
             <div className="flex flex-col gap-8 mt-10 mb-20">
                 <div className="flex flex-col gap-2 px-12">

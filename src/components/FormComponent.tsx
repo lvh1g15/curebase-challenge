@@ -2,6 +2,7 @@ import React, { ReactNode, useState, useEffect } from 'react';
 import { Button } from '@/components/Button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Stepper } from '@/components/ui/stepper';
 
 // Animation variants
 const onExitDuration = 0.3;
@@ -39,6 +40,7 @@ interface FormComponentProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     customVariants?: Record<string, any>; // Allow custom animation variants of any type
     validateForm?: () => boolean; // Optional validation function
+    currentStep?: number; // Current step in the form process
 }
 
 export const FormComponent: React.FC<FormComponentProps> = ({
@@ -48,11 +50,15 @@ export const FormComponent: React.FC<FormComponentProps> = ({
     className,
     animationKey = "form-content",
     customVariants = contentVariants,
-    validateForm
+    validateForm,
+    currentStep = 0
 }) => {
     // Animation states
     const [isExiting, setIsExiting] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
+
+    const steps = ["Minor Info", "Personal Info", "Study Info"];
+    const stepsForStepper = ["Personal Info", "Study Info"];
     
     // Check if we should show the footer
     const showFooter = onSubmit !== undefined || onBack !== undefined;
@@ -93,7 +99,18 @@ export const FormComponent: React.FC<FormComponentProps> = ({
     const variants = customVariants || contentVariants;
 
     return (
-        <div className={cn("flex flex-col h-[500px] relative p-4", className)}>
+        <div className={cn("flex flex-col h-[600px] relative p-4", className)}>
+            {/* Stepper component at the top */}
+            {currentStep > 0 && (
+              <div className="mt-2 mb-2">
+                <Stepper 
+                    steps={stepsForStepper} 
+                    currentStep={currentStep - 1} 
+                    className="mb-2"
+                />
+              </div>
+            )}
+
             <form
                 onSubmit={handleSubmit}
                 className="flex flex-col h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
@@ -131,7 +148,7 @@ export const FormComponent: React.FC<FormComponentProps> = ({
                                 type="submit"
                                 variant="primary"
                             >
-                                Next
+                                {currentStep === steps.length - 1 ? "Submit" : "Next"}
                             </Button>
                         )}
                     </div>
