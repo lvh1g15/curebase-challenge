@@ -92,7 +92,7 @@ export const InvitationStep: React.FC<InvitationStepProps> = ({
   return (
     <div className="relative">
       {/* Gradient background */}
-      <div className="absolute -top-20 left-0 w-full h-[60%] overflow-hidden z-0">
+      <div className="absolute -top-20 left-0 w-full h-[60%] overflow-hidden -z-10">
         <motion.div 
           className="relative w-full aspect-[1.84/1]"
           variants={gradientVariants}
