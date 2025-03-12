@@ -104,7 +104,6 @@ export const FormComponent: React.FC<FormComponentProps> = ({
     const [hasAnimatedFooter, setHasAnimatedFooter] = useState(false);
     const [footerAnimationKey, setFooterAnimationKey] = useState("footer-initial");
     const [currentStep, setCurrentStep] = useState(initialStep || 0);
-    const [stepOneComplete, setStepOneComplete] = useState(true);
 
     const steps = ["Minor Info", "Personal Info", "Study Info"];
     const stepsForStepper = ["Personal Info", "Study Info"];
@@ -220,13 +219,20 @@ export const FormComponent: React.FC<FormComponentProps> = ({
 
     const validateStudyInfoForm = () => {
         console.log("Validating study info form");
-        if (!selectedStudyId) {
-            setError('Please select a study to continue');
+        const newErrors: Record<string, string> = {};
+        
+        if (!selectedStudyId) { 
+            newErrors.study = 'Please select a study to continue';
+            setErrors(newErrors);
             return false;
         }
 
         const study = mockStudies.find(study => study.id === selectedStudyId);
-        if (!study) return false;
+        if (!study) {
+            newErrors.study = 'Please select a study to continue';
+            setErrors(newErrors);
+            return false;
+        }
 
         // Check if all required dropdowns have been selected
         const missingSelections = study.config.filter(
@@ -234,7 +240,26 @@ export const FormComponent: React.FC<FormComponentProps> = ({
         );
 
         if (missingSelections.length > 0) {
-            setError(`Please select ${missingSelections.join(', ')} to continue`);
+            
+            missingSelections.forEach(type => {
+                let label = '';
+                switch (type) {
+                    case 'enrollmentCenter':
+                        label = 'Enrollment Center';
+                        break;
+                    case 'clinic':
+                        label = 'Clinic';
+                        break;
+                    case 'language':
+                        label = 'Preferred Language';
+                        break;
+                    default:
+                        label = type;
+                }
+                newErrors[type] = `Please select a ${label}`;
+            });
+            
+            setErrors(newErrors);
             return false;
         }
 
@@ -315,7 +340,7 @@ export const FormComponent: React.FC<FormComponentProps> = ({
                         selectedOptions={selectedOptions}
                         handleStudySelect={handleStudySelect}
                         handleOptionSelect={handleOptionSelect}
-                        error={error}
+                        errors={errors}
                     />
                 );
 
@@ -348,13 +373,13 @@ export const FormComponent: React.FC<FormComponentProps> = ({
         <div className={cn("flex flex-col h-[600px] relative p-4 pt-16", className)}>
             {currentStep > 0 && (
                 <AnimatePresence>
-                    {(!formComplete && stepOneComplete) && (
+                    {(!formComplete) && (
                         <motion.div
                             className="absolute top-0 left-0 p-4 pt-12 w-full"
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3, delay: 0.5 }}
+                            transition={{ duration: 0.3 }}
                     >
                         <Stepper
                             steps={stepsForStepper}

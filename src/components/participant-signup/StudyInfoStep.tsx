@@ -77,10 +77,10 @@ interface StudyInfoStepProps {
   handleOptionSelect: (type: DropdownType, value: string) => void;
   selectedStudyId: string;
   selectedOptions: Record<DropdownType, string>;
-  error: string;
+  errors: Record<string, string>;
 }
 
-export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ handleStudySelect, handleOptionSelect, selectedStudyId, selectedOptions, error }) => {
+export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ handleStudySelect, handleOptionSelect, selectedStudyId, selectedOptions, errors }) => {
 
 
   // Get the currently selected study
@@ -132,6 +132,9 @@ export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ handleStudySelect,
             ))}
           </SelectContent>
         </Select>
+        {errors[type] && (
+          <p className="text-red-500  text-xs mt-2">{errors[type]}</p>
+        )}
       </motion.div>
     );
   };
@@ -170,6 +173,9 @@ export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ handleStudySelect,
                 ))}
               </SelectContent>
             </Select>
+            {errors.study && (
+              <p className="text-red-500 text-xs mt-2">{errors.study}</p>
+            )}
           </div>
 
 
@@ -196,10 +202,6 @@ export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ handleStudySelect,
             </motion.div>
           )}
         </div>
-
-        {error && (
-          <p className="text-red-500 text-sm mt-1 px-4">{error}</p>
-        )}
       </motion.div>
     );
   };
