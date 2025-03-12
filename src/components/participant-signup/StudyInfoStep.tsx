@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { DropdownType, StudyInfo } from './types';
+import React from 'react';
+import { DropdownType } from './types';
 import { mockStudies, mockEnrollmentCenters, mockClinics, mockLanguages } from './mockData';
 import { motion } from 'framer-motion';
-import { FormComponent } from '@/components/FormComponent';
 import {
   Select,
   SelectContent,

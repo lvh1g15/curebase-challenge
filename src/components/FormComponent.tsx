@@ -129,7 +129,6 @@ export const FormComponent: React.FC<FormComponentProps> = ({
         clinic: '',
         language: '',
     });
-    const [error, setError] = useState<string>('');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [formComplete, setFormComplete] = useState<boolean>(false);
     // Handler for updating participant information
@@ -145,7 +144,6 @@ export const FormComponent: React.FC<FormComponentProps> = ({
             clinic: '',
             language: '',
         });
-        setError('');
     };
 
     const handleOptionSelect = (type: DropdownType, value: string) => {
