@@ -7,17 +7,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
 interface InvitationStepProps {
-  onComplete: () => void;
-  onBack: () => void;
   participantInfo: ParticipantInfo;
   studyInfo: StudyInfo;
+  onComplete: () => void;
 }
 
 export const InvitationStep: React.FC<InvitationStepProps> = ({
-  onComplete,
-  onBack,
   participantInfo,
-  studyInfo
+  studyInfo,
+  onComplete,
 }) => {
   const [showContent, setShowContent] = useState(false);
   const [heightAnimationComplete, setHeightAnimationComplete] = useState(false);

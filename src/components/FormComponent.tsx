@@ -1,69 +1,159 @@
-import React, { ReactNode, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/Button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Stepper } from '@/components/ui/stepper';
+import { IsMinorStep } from './participant-signup/IsMinorStep';
+import { AdultInfoStep } from './participant-signup/AdultInfoStep';
+import { StudyInfoStep } from './participant-signup/StudyInfoStep';
+import { mockStudies } from './participant-signup/mockData';
+import { DropdownType, ParticipantInfo, ParticipantType, StudyInfo } from './participant-signup/types';
 
 // Animation variants
 const onExitDuration = 0.3;
 
 const contentVariants = {
-  enter: {
-    x: 50,
-    opacity: 0,
-  },
-  center: {
-    x: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.3,
-      delay: 0.3,
-      ease: "easeOut",
+    enter: {
+        x: 50,
+        opacity: 0,
     },
-  },
-  exit: {
-    x: -50,
-    opacity: 0,
-    transition: {
-      duration: onExitDuration,
-      ease: "easeIn",
+    center: {
+        x: 0,
+        opacity: 1,
+        transition: {
+            duration: 0.3,
+            delay: 0.3,
+            ease: "easeOut",
+        },
     },
-  },
+    exit: {
+        x: -50,
+        opacity: 0,
+        transition: {
+            duration: onExitDuration,
+            ease: "easeIn",
+        },
+    },
+};
+
+// Footer animation variants
+const footerVariants = {
+    hidden: {
+        y: 100,
+        opacity: 0,
+    },
+    visible: {
+        y: 0,
+        opacity: 1,
+        transition: {
+            duration: 0.8,
+            ease: "easeOut",
+        },
+    },
+    exit: {
+        y: 100,
+        opacity: 0,
+        transition: {
+            duration: 0.3,
+            ease: "easeIn",
+        },
+    },
 };
 
 interface FormComponentProps {
     onSubmit?: (e: React.FormEvent) => void;
     onBack?: () => void;
-    children: ReactNode;
     className?: string;
     animationKey?: string; // Unique key for the animation
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     customVariants?: Record<string, any>; // Allow custom animation variants of any type
-    validateForm?: () => boolean; // Optional validation function
-    currentStep?: number; // Current step in the form process
+    currentStep?: number; // Optional prop to set the initial step
+    onComplete: (participantInfo: ParticipantInfo, studyInfo: StudyInfo) => void;
 }
 
 export const FormComponent: React.FC<FormComponentProps> = ({
-    onSubmit,
-    onBack,
-    children,
     className,
     animationKey = "form-content",
     customVariants = contentVariants,
-    validateForm,
-    currentStep = 0
+    currentStep: initialStep,
+    onComplete,
 }) => {
     // Animation states
     const [isExiting, setIsExiting] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
+    const [hasAnimatedFooter, setHasAnimatedFooter] = useState(false);
+    const [footerAnimationKey, setFooterAnimationKey] = useState("footer-initial");
+    const [currentStep, setCurrentStep] = useState(initialStep || 0);
 
     const steps = ["Minor Info", "Personal Info", "Study Info"];
     const stepsForStepper = ["Personal Info", "Study Info"];
-    
+
+    // State for participant type (minor or adult)
+    const [participantType, setParticipantType] = useState<ParticipantType | null>(null);
+    // State for selected study
+    const [selectedStudy, setSelectedStudy] = useState<StudyInfo | null>(null);
+
+    // State for participant information
+    const [participantInfo, setParticipantInfo] = useState<ParticipantInfo>({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        dateOfBirth: '',
+        guardianName: '',
+        guardianEmail: '',
+        guardianPhone: '',
+    });
+
+    const [selectedStudyId, setSelectedStudyId] = useState<string>('');
+    const [selectedOptions, setSelectedOptions] = useState<Record<DropdownType, string>>({
+        enrollmentCenter: '',
+        clinic: '',
+        language: '',
+    });
+    const [error, setError] = useState<string>('');
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [formComplete, setFormComplete] = useState<boolean>(false);
+    // Handler for updating participant information
+    const updateParticipantInfo = (info: Partial<ParticipantInfo>) => {
+        setParticipantInfo(prev => ({ ...prev, ...info }));
+    };
+
+    const handleStudySelect = (studyId: string) => {
+        setSelectedStudyId(studyId);
+        // Reset all dropdown selections when study changes
+        setSelectedOptions({
+            enrollmentCenter: '',
+            clinic: '',
+            language: '',
+        });
+        setError('');
+    };
+
+    const handleOptionSelect = (type: DropdownType, value: string) => {
+        setSelectedOptions(prev => ({
+            ...prev,
+            [type]: value
+        }));
+    };
+
     // Check if we should show the footer
-    const showFooter = currentStep === 0;
-    console.log(showFooter);
-    
+    const showFooter = currentStep !== 0;
+
+    // Track when currentStep changes to 1 to animate footer only once
+    useEffect(() => {
+        if (currentStep === 1 && !hasAnimatedFooter) {
+            setHasAnimatedFooter(true);
+            // Set a unique key for the initial animation
+            setFooterAnimationKey("footer-animated");
+        }
+    }, [currentStep, hasAnimatedFooter]);
+
+    // Log when hasAnimatedFooter changes
+    useEffect(() => {
+        console.log("hasAnimatedFooter updated:", hasAnimatedFooter);
+    }, [hasAnimatedFooter]);
+
     // Component mount effect
     useEffect(() => {
         // Ensure component is visible when mounted
@@ -73,26 +163,153 @@ export const FormComponent: React.FC<FormComponentProps> = ({
             setIsVisible(false);
         };
     }, []);
-    
+
+    useEffect(() => {
+        if (formComplete) {
+            onComplete(participantInfo, selectedStudy!);
+        }
+    }, [formComplete]);
+
+
+    const validatePersonalInfoForm = () => {
+        const newErrors: Record<string, string> = {};
+
+        if (!participantInfo.firstName?.trim()) {
+            newErrors.firstName = 'First name is required';
+        }
+
+        if (!participantInfo.lastName?.trim()) {
+            newErrors.lastName = 'Last name is required';
+        }
+
+        if (!participantInfo.email?.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(participantInfo.email)) {
+            newErrors.email = 'Please enter a valid email';
+        }
+
+        if (participantInfo.phone && !/^\d{10}$/.test(participantInfo.phone.replace(/\D/g, ''))) {
+            newErrors.phone = 'Please enter a valid 10-digit phone number';
+        }
+
+        if (participantInfo.zipcode && !/^\d{5}(-\d{4})?$/.test(participantInfo.zipcode)) {
+            newErrors.zipcode = 'Please enter a valid ZIP code (e.g., 12345 or 12345-6789)';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const validateStudyInfoForm = () => {
+        console.log("Validating study info form");
+        if (!selectedStudyId) {
+            setError('Please select a study to continue');
+            return false;
+        }
+
+        const study = mockStudies.find(study => study.id === selectedStudyId);
+        if (!study) return false;
+
+        // Check if all required dropdowns have been selected
+        const missingSelections = study.config.filter(
+            type => !selectedOptions[type]
+        );
+
+        if (missingSelections.length > 0) {
+            setError(`Please select ${missingSelections.join(', ')} to continue`);
+            return false;
+        }
+
+        // Create a complete study info object with selected options
+        const completeStudyInfo: StudyInfo = {
+            ...study,
+            selectedOptions: { ...selectedOptions }
+        };
+
+        // Update the parent component with the selected study
+        setSelectedStudy(completeStudyInfo);
+        console.log(completeStudyInfo);
+        return true;
+    };
+
     // Handle form submission with optional onSubmit
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        
-        if (onSubmit) {
-            // If validateForm is provided, use it, otherwise default to true
-            const isValid = validateForm ? validateForm() : true;
-            
-            if (isValid) {
-                // Set exiting state to trigger exit animation
-                setIsExiting(true);
-                
-                // Wait for exit animation to complete before calling onNext
-                const animationDuration = customVariants.exit.transition.duration * 1000; // 300ms from exit transition
-                setTimeout(() => {
-                    setIsVisible(false);
-                    onSubmit(e);
-                }, animationDuration);
-            }
+    const handleSubmit = () => {
+
+        setIsExiting(true);
+
+        // Wait for exit animation to complete before calling onNext
+        const animationDuration = customVariants.exit.transition.duration * 1000; // 300ms from exit transition
+        setTimeout(() => {
+            setIsVisible(false);
+            // onSubmit(e);
+        }, animationDuration);
+    };
+
+    const goToNextStep = () => {
+        console.log("Going to next step", currentStep);
+        switch (currentStep) {
+            case 1:
+                // validate form
+                const isValidPersonalInfo = validatePersonalInfoForm();
+                if (!isValidPersonalInfo) {
+                    return;
+                }
+                break;
+            case 2:
+                // validate form
+                const isValidStudyInfo = validateStudyInfoForm();
+                if (!isValidStudyInfo) {
+                    return;
+                }
+                console.log(participantInfo, selectedStudy);
+                // onComplete(participantInfo, selectedStudy!);
+                break;
+        }
+
+        const tempStep = currentStep + 1;
+        if (tempStep === 3) {
+            console.log("Form complete");
+            handleSubmit();
+            setFormComplete(true);
+            return;
+        }
+        setCurrentStep(tempStep);
+    };
+
+    const goBack = () => {
+        setCurrentStep(currentStep - 1);
+    };
+
+    const renderStep = () => {
+        console.log(currentStep, selectedStudy);
+
+        switch (currentStep) {
+            case 1:
+                return (
+                    <AdultInfoStep
+                        updateParticipantInfo={updateParticipantInfo}
+                        participantInfo={participantInfo}
+                        errors={errors}
+                    />
+                );
+
+            case 2:
+                return (
+                    <StudyInfoStep
+                        selectedStudyId={selectedStudyId}
+                        selectedOptions={selectedOptions}
+                        handleStudySelect={handleStudySelect}
+                        handleOptionSelect={handleOptionSelect}
+                        error={error}
+                    />
+                );
+
+            default:
+                return (
+                    <IsMinorStep
+                        onNext={() => goToNextStep()}
+                    />
+                );
         }
     };
 
@@ -100,62 +317,68 @@ export const FormComponent: React.FC<FormComponentProps> = ({
     const variants = customVariants || contentVariants;
 
     return (
-        <div className={cn("flex flex-col h-[600px] relative p-4", className)}>
-            {/* Stepper component at the top */}
-            {currentStep > 0 && (
-              <div className="mt-2 mb-2">
-                <Stepper 
-                    steps={stepsForStepper} 
-                    currentStep={currentStep - 1} 
-                    className="mb-2"
-                />
-              </div>
-            )}
-            <form
-                onSubmit={handleSubmit}
-                className="px-1 flex flex-col h-full overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-            >
-                {/* Scrollable content area with animation */}
-                <AnimatePresence mode="wait">
-                    {isVisible && !isExiting && (
-                        <motion.div 
-                            className="flex-1"
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            variants={variants}
-                            key={animationKey}
-                        >
-                            {children}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Fixed footer with buttons - only shown when needed */}
-                {!showFooter && (
-                    <div className="absolute bottom-0 p-4 left-0 right-0 flex justify-between w-full bg-primary/80 backdrop-blur-xs">
-                        {onBack && (
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={onBack}
-                                className="cursor-pointer bg-primary/70 hover:bg-primary/50 text-white"
-                            >
-                                Back
-                            </Button>
-                        )}
-                        {onSubmit && (
-                            <Button
-                                type="submit"
-                                variant="primary"
-                                className="cursor-pointer bg-secondary hover:bg-secondary/70"
-                            >
-                                {currentStep === steps.length - 1 ? "Submit" : "Next"}
-                            </Button>
-                        )}
+        (!formComplete) && (
+            <div className={cn("flex flex-col h-[600px] relative p-4", className)}>
+                {/* Stepper component at the top */}
+                {currentStep > 0 && (
+                    <div className="mt-2 mb-2">
+                        <Stepper
+                            steps={stepsForStepper}
+                            currentStep={currentStep - 1}
+                            className="mb-2"
+                        />
                     </div>
                 )}
-            </form>
-        </div>
-    );
+                <form
+                    className="px-1 flex flex-col h-full overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                >
+                    {/* Scrollable content area with animation */}
+                    <AnimatePresence mode="wait">
+                        {isVisible && !isExiting && (
+                            <motion.div
+                                className="flex-1"
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                variants={variants}
+                                key={animationKey}
+                            >
+                                {renderStep()}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Fixed footer with buttons - only shown when needed */}
+                    <AnimatePresence mode="wait">
+                        {showFooter && (
+                            <motion.div
+                                className="absolute bottom-0 p-4 left-0 right-0 flex justify-between w-full bg-primary/80 backdrop-blur-xs"
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
+                                variants={footerVariants}
+                                key={footerAnimationKey}
+                            >
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => goBack()}
+                                    className="cursor-pointer bg-primary/70 hover:bg-primary/50 text-white"
+                                >
+                                    Back
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="primary"
+                                    className="cursor-pointer bg-secondary hover:bg-secondary/70"
+                                    onClick={() => goToNextStep()}
+                                >
+                                    {currentStep === steps.length - 1 ? "Submit" : "Next"}
+                                </Button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </form>
+            </div>
+        ));
 };

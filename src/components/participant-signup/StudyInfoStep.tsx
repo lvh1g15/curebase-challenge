@@ -42,12 +42,12 @@ const contentVariants = {
 
 // Dropdown animation variants
 const dropdownVariants = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     y: 20,
     height: 0
   },
-  visible: { 
+  visible: {
     opacity: 1,
     y: 0,
     height: "auto",
@@ -63,8 +63,8 @@ const dropdownVariants = {
 // Individual dropdown item animation
 const dropdownItemVariants = {
   hidden: { opacity: 0, y: 10 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: {
       duration: 0.3
@@ -73,81 +73,26 @@ const dropdownItemVariants = {
 };
 
 interface StudyInfoStepProps {
-  onNext: () => void;
-  onBack: () => void;
-  setSelectedStudy: (study: StudyInfo) => void;
+  handleStudySelect: (studyId: string) => void;
+  handleOptionSelect: (type: DropdownType, value: string) => void;
+  selectedStudyId: string;
+  selectedOptions: Record<DropdownType, string>;
+  error: string;
 }
 
-export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ onNext, onBack, setSelectedStudy }) => {
-  const [selectedStudyId, setSelectedStudyId] = useState<string>('');
-  const [selectedOptions, setSelectedOptions] = useState<Record<DropdownType, string>>({
-    enrollmentCenter: '',
-    clinic: '',
-    language: '',
-  });
-  const [error, setError] = useState<string>('');
+export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ handleStudySelect, handleOptionSelect, selectedStudyId, selectedOptions, error }) => {
 
-  const handleStudySelect = (studyId: string) => {
-    setSelectedStudyId(studyId);
-    // Reset all dropdown selections when study changes
-    setSelectedOptions({
-      enrollmentCenter: '',
-      clinic: '',
-      language: '',
-    });
-    setError('');
-  };
-
-  const handleOptionSelect = (type: DropdownType, value: string) => {
-    setSelectedOptions(prev => ({
-      ...prev,
-      [type]: value
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedStudyId) {
-      setError('Please select a study to continue');
-      return;
-    }
-    
-    const study = mockStudies.find(study => study.id === selectedStudyId);
-    if (!study) return;
-    
-    // Check if all required dropdowns have been selected
-    const missingSelections = study.config.filter(
-      type => !selectedOptions[type]
-    );
-    
-    if (missingSelections.length > 0) {
-      setError(`Please select ${missingSelections.join(', ')} to continue`);
-      return;
-    }
-    
-    // Create a complete study info object with selected options
-    const completeStudyInfo: StudyInfo = {
-      ...study,
-      selectedOptions: { ...selectedOptions }
-    };
-    
-    // Update the parent component with the selected study
-    setSelectedStudy(completeStudyInfo);
-    
-    onNext();
-  };
 
   // Get the currently selected study
-  const selectedStudy = selectedStudyId 
-    ? mockStudies.find(s => s.id === selectedStudyId) 
+  const selectedStudy = selectedStudyId
+    ? mockStudies.find(s => s.id === selectedStudyId)
     : null;
 
   // Render a specific dropdown based on type
   const renderDropdown = (type: DropdownType) => {
     let options: { id: string; name: string }[] = [];
     let label = '';
-    
+
     switch (type) {
       case 'enrollmentCenter':
         options = mockEnrollmentCenters;
@@ -162,18 +107,18 @@ export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ onNext, onBack, se
         label = 'Preferred Language';
         break;
     }
-    
+
     return (
-      <motion.div 
-        className="form-control w-full mt-4" 
+      <motion.div
+        className="form-control w-full mt-4"
         key={type}
         variants={dropdownItemVariants}
       >
         <label className="block text-sm font-medium mb-1" htmlFor={`${type}-select`}>
           {label}
         </label>
-        <Select 
-          value={selectedOptions[type]} 
+        <Select
+          value={selectedOptions[type]}
           onValueChange={(value) => handleOptionSelect(type, value)}
         >
           <SelectTrigger id={`${type}-select`} className="w-full">
@@ -207,7 +152,7 @@ export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ onNext, onBack, se
             This will tell us which study to add the participant to.
           </p>
         </div>
-        
+
         <div>
           <div className="form-control w-full">
             <label className="block text-sm font-medium mb-1" htmlFor="study-select">
@@ -226,11 +171,11 @@ export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ onNext, onBack, se
               </SelectContent>
             </Select>
           </div>
-        
-          
+
+
           {/* Render dynamic dropdowns based on selected study config */}
           {selectedStudy && (
-            <motion.div 
+            <motion.div
               className="mt-4"
               initial="hidden"
               animate="visible"
@@ -242,16 +187,16 @@ export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ onNext, onBack, se
                   <AlertTitle>Data Collection Study</AlertTitle>
                   <AlertDescription>
                     You&apos;ll have the option to invite this user to create an account in the next step so you can start collecting data.
-                    </AlertDescription>
+                  </AlertDescription>
                 </Alert>
               )}
-              {selectedStudy.config.map(dropdownType => 
+              {selectedStudy.config.map(dropdownType =>
                 renderDropdown(dropdownType)
               )}
             </motion.div>
           )}
         </div>
-        
+
         {error && (
           <p className="text-red-500 text-sm mt-1 px-4">{error}</p>
         )}
@@ -260,15 +205,8 @@ export const StudyInfoStep: React.FC<StudyInfoStepProps> = ({ onNext, onBack, se
   };
 
   return (
-    <FormComponent 
-      onSubmit={handleSubmit} 
-      onBack={onBack} 
-      currentStep={2}
-      animationKey="study-info-step"
-    >
-      <div className='mb-20 mt-10'>
-        {renderContent()}
-      </div>
-    </FormComponent>
+    <div className='mb-20 mt-10'>
+      {renderContent()}
+    </div>
   );
 }; 

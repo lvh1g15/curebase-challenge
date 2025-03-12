@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -10,132 +10,45 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/Button';
-import { IsMinorStep } from './IsMinorStep';
-import { AdultInfoStep } from './AdultInfoStep';
-import { StudyInfoStep } from './StudyInfoStep';
-import { InvitationStep } from './InvitationStep';
-import { ParticipantInfo, ParticipantType, SignupStep, StudyInfo } from './types';
+import { ParticipantInfo, SignupStep, StudyInfo } from './types';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { FormComponent } from '../FormComponent';
+import { InvitationStep } from './InvitationStep';
 
 export const ParticipantSignup: React.FC = () => {
     // State for tracking the current step in the flow
     const [currentStep, setCurrentStep] = useState<SignupStep>('isMinor');
-
-    // State for participant type (minor or adult)
-    const [participantType, setParticipantType] = useState<ParticipantType | null>(null);
-
-    // State for participant information
+    const [formComplete, setFormComplete] = useState<boolean>(false);
     const [participantInfo, setParticipantInfo] = useState<ParticipantInfo>({
         firstName: '',
         lastName: '',
         email: '',
+        phone: '',
         dateOfBirth: '',
-        guardianName: '',
-        guardianEmail: '',
-        guardianPhone: '',
+    });    
+    const [studyInfo, setStudyInfo] = useState<StudyInfo>({
+        id: '',
+        name: '',
+        description: '',
+        config: [],
+        selectedOptions: {
+            enrollmentCenter: '',
+            clinic: '',
+            language: '',
+        },
+        isDataCollection: false,
     });
 
-    // State for selected study
-    const [selectedStudy, setSelectedStudy] = useState<StudyInfo | null>(null);
+    function onFormComplete(participantInfo: ParticipantInfo, studyInfo: StudyInfo): void {
+        console.log('Form submitted');
+        setParticipantInfo(participantInfo);
+        setStudyInfo(studyInfo);
+        setFormComplete(true);
+    }
 
-    // Handler for updating participant information
-    const updateParticipantInfo = (info: Partial<ParticipantInfo>) => {
-        setParticipantInfo(prev => ({ ...prev, ...info }));
-    };
-
-    // Handler for completing the flow
-    const handleComplete = () => {
-        // In a real application, you would submit the data to your backend here
-        console.log('Participant signup completed:', {
-            participantType,
-            participantInfo,
-            selectedStudy
-        });
-
-        // Reset the form and close the dialog
-        setCurrentStep('isMinor');
-        setParticipantType(null);
-        setParticipantInfo({
-            firstName: '',
-            lastName: '',
-            email: '',
-            dateOfBirth: '',
-            guardianName: '',
-            guardianEmail: '',
-            guardianPhone: '',
-        });
-        setSelectedStudy(null);
-    };
-
-    // Navigation handlers
-    const goBack = () => {
-        switch (currentStep) {
-            case 'minorInfo':
-                setCurrentStep('isMinor');
-                break;
-            case 'adultInfo':
-                setCurrentStep('isMinor');
-                break;
-            case 'studyInfo':
-                if (participantType === 'minor') {
-                    setCurrentStep('minorInfo');
-                } else {
-                    setCurrentStep('adultInfo');
-                }
-                break;
-            case 'invitation':
-                setCurrentStep('studyInfo');
-                break;
-            default:
-                setCurrentStep('isMinor');
-        }
-    };
-
-    const goToNextStep = (step: SignupStep) => {
-        setCurrentStep(step);
-    };
-
-    // Render the current step
-    const renderStep = () => {
-        switch (currentStep) {
-
-            case 'adultInfo':
-                return (
-                    <AdultInfoStep
-                        onNext={() => goToNextStep('studyInfo')}
-                        onBack={goBack}
-                        updateParticipantInfo={updateParticipantInfo}
-                        participantInfo={participantInfo}
-                    />
-                );
-
-            case 'studyInfo':
-                return (
-                    <StudyInfoStep
-                        onNext={() => goToNextStep('invitation')}
-                        onBack={goBack}
-                        setSelectedStudy={setSelectedStudy}
-                    />
-                );
-
-            case 'invitation':
-                return (
-                    <InvitationStep
-                        onComplete={handleComplete}
-                        onBack={goBack}
-                        participantInfo={participantInfo}
-                        studyInfo={selectedStudy!}
-                    />
-                );
-
-            default:
-                return (
-                    <IsMinorStep 
-                        onNext={() => goToNextStep('adultInfo')}
-                    />
-                );
-        }
-    };
+    const onInvitationComplete = () => {
+        console.log('Invitation submitted');
+    }
 
     return (
         <Dialog>
@@ -153,12 +66,11 @@ export const ParticipantSignup: React.FC = () => {
                         </DialogDescription>
                     </DialogHeader>
                 </VisuallyHidden>
-                <div className="relative">
-                    {/* Step content */}
-                    <div className="mt-6">
-                        {renderStep()}
-                    </div>
-                </div>
+                {formComplete ? (
+                    <InvitationStep participantInfo={participantInfo} studyInfo={studyInfo} onComplete={onInvitationComplete} />
+                ) : (
+                    <FormComponent onComplete={onFormComplete} />
+                )}
             </DialogContent>
         </Dialog>
     );
