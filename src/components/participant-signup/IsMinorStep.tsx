@@ -17,14 +17,14 @@ const fadeVariants = {
   center: {
     opacity: 1,
     transition: {
-      duration: 0.7,
+      duration: 0.5,
       delay: 0.3,
     },
   },
   exit: {
     opacity: 0,
     transition: {
-      duration: 0.7,
+      duration: 0.5,
     },
   },
 };
@@ -54,6 +54,8 @@ export const IsMinorStep: React.FC<IsMinorStepProps> = ({ onNext }) => {
     <FormComponent
       animationKey="is-minor-step"
       customVariants={fadeVariants}
+      onSubmit={handleAdultSelect}
+      currentStep={0}
     >
       {!showMinorInfo ? (
         <div className="flex flex-col gap-6 justify-center items-center h-full">
@@ -67,14 +69,14 @@ export const IsMinorStep: React.FC<IsMinorStepProps> = ({ onNext }) => {
             <Button
               variant="primary"
               className="w-full"
-              onClick={handleAdultSelect}
+              type='submit'
             >
               Participant is over 13 years old
             </Button>
 
             <Button
-              variant="secondary"
-              className="w-full"
+              variant="primaryLight"
+              className="w-full cursor-pointer"
               onClick={handleMinorSelect}
             >
               Participant is less than 13 years old
@@ -82,7 +84,7 @@ export const IsMinorStep: React.FC<IsMinorStepProps> = ({ onNext }) => {
           </div>
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger className="text-xs font-medium text-blue-600 text-center">Why does this matter?</TooltipTrigger>
+              <TooltipTrigger className="text-xs font-medium text-secondary text-center cursor-pointer">Why does this matter?</TooltipTrigger>
               <TooltipContent className="text-center">
                 <p>Participants under 13 are not able to consent to the use of their data in this study.
                   <br />

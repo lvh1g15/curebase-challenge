@@ -146,27 +146,27 @@ export const InvitationStep: React.FC<InvitationStepProps> = ({
               </motion.div>
 
               {/* Participant card */}
-              <motion.div variants={childVariants} className="flex flex-col gap-4 w-full bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+              <motion.div variants={childVariants} className="flex flex-col gap-4 w-full bg-primary dark:bg-gray-800 rounded-2xl p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <div className="w-10 h-10 bg-primary-800 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-primary-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
                   <div>
-                    <p className="font-medium">{participantInfo.firstName} {participantInfo.lastName}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{participantInfo.email}</p>
+                    <p className="font-medium text-white">{participantInfo.firstName} {participantInfo.lastName}</p>
+                    <p className="text-sm text-primary-300 dark:text-gray-400">{participantInfo.email}</p>
                   </div>
                 </div>
-                <Separator orientation="horizontal" />
+                <Separator orientation="horizontal" className="bg-primary-700 dark:bg-gray-700" />
 
                 <div className="flex items-center gap-2">
                   <div className="size-6 flex-shrink-0">
-                    <svg className="w-full h-full text-gray-400 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg className="w-full h-full text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <p className="text-sm text-gray-400 dark:text-gray-300">{studyInfo.name}</p>
+                  <p className="text-sm text-primary-300 dark:text-gray-300">{studyInfo.name}</p>
                 </div>
               </motion.div>
 
@@ -177,17 +177,17 @@ export const InvitationStep: React.FC<InvitationStepProps> = ({
                   
                   {/* Completed step with strikethrough */}
                   <div className="flex items-center gap-4">
-                    <div className="size-6 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="size-6 bg-primary-300 rounded-full flex items-center justify-center flex-shrink-0">
                       <Check className="size-4 text-white" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-normal text-sm line-through text-gray-400 dark:text-gray-400">Participant added to study</p>
+                      <p className="font-normal text-sm line-through text-primary-400">Participant added to study</p>
                     </div>
                   </div>
 
                   {/* Next step highlighted */}
                   <div className="flex items-center gap-4 relative">
-                    <div className="size-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 ring-4 ring-blue-100 dark:ring-blue-900">
+                    <div className="size-6 bg-secondary-900 rounded-full flex items-center justify-center flex-shrink-0 ring-4 ring-secondary-100 dark:ring-secondary-900">
                       <Send className="size-3 text-white" />
                     </div>
                     <div className="flex-1">
@@ -227,27 +227,7 @@ export const InvitationStep: React.FC<InvitationStepProps> = ({
                     >
                       Maybe later
                     </Button>
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={onBack}
-                      className="w-full py-3 rounded-full text-gray-500 hover:bg-gray-50 font-medium cursor-pointer mt-2"
-                    >
-                      Back to study selection
-                    </Button>
                   </>
-                )}
-
-                {!studyInfo.isDataCollection && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onBack}
-                    className="w-full py-3 rounded-full text-gray-500 hover:bg-gray-50 font-medium cursor-pointer mt-2"
-                  >
-                    Back to study selection
-                  </Button>
                 )}
               </motion.div>
             </motion.div>

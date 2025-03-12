@@ -144,7 +144,7 @@ export const ParticipantSignup: React.FC = () => {
                     Sign Up Participant
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md p-0 overflow-clip">
+            <DialogContent className="max-w-md p-0 overflow-clip rounded-3xl">
                 <VisuallyHidden>
                     <DialogHeader>
                         <DialogTitle>Participant Sign Up</DialogTitle>

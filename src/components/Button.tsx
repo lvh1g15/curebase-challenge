@@ -1,6 +1,6 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline';
+type ButtonVariant = 'primary' | 'primaryLight' | 'secondary' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -20,12 +20,13 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   // Base styles
-  const baseStyles = 'rounded-full font-medium transition-colors flex items-center justify-center';
+  const baseStyles = 'rounded-full font-medium transition-colors flex items-center justify-center cursor-pointer';
   
   // Variant styles
   const variantStyles = {
-    primary: 'bg-foreground text-background hover:bg-[#383838] dark:hover:bg-[#ccc]',
-    secondary: 'bg-[#f2f2f2] dark:bg-[#1a1a1a] hover:bg-[#e5e5e5] dark:hover:bg-[#2a2a2a]',
+    primary: 'bg-primary text-white hover:bg-primary-900/90 dark:hover:bg-primary-800',
+    primaryLight: 'bg-primary-100 text-primary-900 hover:bg-primary-100/80 dark:hover:bg-primary-200',
+    secondary: 'bg-secondary text-white hover:bg-secondary/80 dark:hover:bg-secondary-800',
     outline: 'border border-solid border-black/[.08] dark:border-white/[.145] hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a]'
   };
   

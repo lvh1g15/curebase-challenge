@@ -12,7 +12,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     return (
       <div 
         ref={ref} 
-        className={cn("w-full flex flex-col", className)}
+        className={cn("w-full flex flex-col px-1", className)}
       >
         {/* Progress bars */}
         <div className="flex gap-2 w-full mb-2">
@@ -29,9 +29,9 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                   "h-1 flex-1",
                   index === 0 ? "rounded-full" : "",
                   index === steps.length - 1 ? "rounded-full" : "",
-                  isActive && "bg-blue-600",
-                  isPast && "bg-blue-600",
-                  isFuture && "bg-gray-200"
+                  isActive && "bg-secondary",
+                  isPast && "bg-secondary",
+                  isFuture && "bg-secondary-200"
                 )}
               />
             );
@@ -57,9 +57,9 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                 <span 
                   className={cn(
                     "text-sm font-normal",
-                    isActive && "text-blue-600",
-                    isPast && "text-blue-600",
-                    isFuture && "text-gray-400"
+                    isActive && "text-secondary",
+                    isPast && "text-secondary",
+                    isFuture && "text-secondary-300"
                   )}
                 >
                   {step}

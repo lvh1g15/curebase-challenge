@@ -61,7 +61,8 @@ export const FormComponent: React.FC<FormComponentProps> = ({
     const stepsForStepper = ["Personal Info", "Study Info"];
     
     // Check if we should show the footer
-    const showFooter = onSubmit !== undefined || onBack !== undefined;
+    const showFooter = currentStep === 0;
+    console.log(showFooter);
     
     // Component mount effect
     useEffect(() => {
@@ -110,10 +111,9 @@ export const FormComponent: React.FC<FormComponentProps> = ({
                 />
               </div>
             )}
-
             <form
                 onSubmit={handleSubmit}
-                className="flex flex-col h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                className="px-1 flex flex-col h-full overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             >
                 {/* Scrollable content area with animation */}
                 <AnimatePresence mode="wait">
@@ -132,13 +132,14 @@ export const FormComponent: React.FC<FormComponentProps> = ({
                 </AnimatePresence>
 
                 {/* Fixed footer with buttons - only shown when needed */}
-                {showFooter && (
-                    <div className="absolute bottom-0 p-4 left-0 right-0 flex justify-between w-full bg-white/20 backdrop-blur-sm border-t border-gray-100">
+                {!showFooter && (
+                    <div className="absolute bottom-0 p-4 left-0 right-0 flex justify-between w-full bg-primary/80 backdrop-blur-xs">
                         {onBack && (
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={onBack}
+                                className="cursor-pointer bg-primary/70 hover:bg-primary/50 text-white"
                             >
                                 Back
                             </Button>
@@ -147,6 +148,7 @@ export const FormComponent: React.FC<FormComponentProps> = ({
                             <Button
                                 type="submit"
                                 variant="primary"
+                                className="cursor-pointer bg-secondary hover:bg-secondary/70"
                             >
                                 {currentStep === steps.length - 1 ? "Submit" : "Next"}
                             </Button>
