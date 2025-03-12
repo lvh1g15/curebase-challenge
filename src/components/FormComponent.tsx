@@ -7,12 +7,13 @@ import { IsMinorStep } from './participant-signup/IsMinorStep';
 import { AdultInfoStep } from './participant-signup/AdultInfoStep';
 import { StudyInfoStep } from './participant-signup/StudyInfoStep';
 import { mockStudies } from './participant-signup/mockData';
-import { DropdownType, ParticipantInfo, ParticipantType, StudyInfo } from './participant-signup/types';
+import { DropdownType, ParticipantInfo, StudyInfo } from './participant-signup/types';
 
 // Animation variants
-const onExitDuration = 0.3;
+const onExitDuration = 0.5;
+const formExitDuration = 0.5;
 
-const contentVariants = {
+const slideVariants = {
     enter: {
         x: 50,
         opacity: 0,
@@ -32,6 +33,26 @@ const contentVariants = {
         transition: {
             duration: onExitDuration,
             ease: "easeIn",
+        },
+    },
+};
+
+// Fade animation variants
+const fadeVariants = {
+    enter: {
+        opacity: 0,
+    },
+    center: {
+        opacity: 1,
+        transition: {
+            duration: 0.5,
+            delay: 0.3,
+        },
+    },
+    exit: {
+        opacity: 0,
+        transition: {
+            duration: 0.5,
         },
     },
 };
@@ -74,7 +95,6 @@ interface FormComponentProps {
 export const FormComponent: React.FC<FormComponentProps> = ({
     className,
     animationKey = "form-content",
-    customVariants = contentVariants,
     currentStep: initialStep,
     onComplete,
 }) => {
@@ -84,12 +104,11 @@ export const FormComponent: React.FC<FormComponentProps> = ({
     const [hasAnimatedFooter, setHasAnimatedFooter] = useState(false);
     const [footerAnimationKey, setFooterAnimationKey] = useState("footer-initial");
     const [currentStep, setCurrentStep] = useState(initialStep || 0);
+    const [stepOneComplete, setStepOneComplete] = useState(true);
 
     const steps = ["Minor Info", "Personal Info", "Study Info"];
     const stepsForStepper = ["Personal Info", "Study Info"];
 
-    // State for participant type (minor or adult)
-    const [participantType, setParticipantType] = useState<ParticipantType | null>(null);
     // State for selected study
     const [selectedStudy, setSelectedStudy] = useState<StudyInfo | null>(null);
 
@@ -149,11 +168,6 @@ export const FormComponent: React.FC<FormComponentProps> = ({
         }
     }, [currentStep, hasAnimatedFooter]);
 
-    // Log when hasAnimatedFooter changes
-    useEffect(() => {
-        console.log("hasAnimatedFooter updated:", hasAnimatedFooter);
-    }, [hasAnimatedFooter]);
-
     // Component mount effect
     useEffect(() => {
         // Ensure component is visible when mounted
@@ -166,7 +180,11 @@ export const FormComponent: React.FC<FormComponentProps> = ({
 
     useEffect(() => {
         if (formComplete) {
-            onComplete(participantInfo, selectedStudy!);
+            const timer = setTimeout(() => {
+                onComplete(participantInfo, selectedStudy!);
+            }, formExitDuration * 1000);
+            
+            return () => clearTimeout(timer);
         }
     }, [formComplete]);
 
@@ -238,7 +256,7 @@ export const FormComponent: React.FC<FormComponentProps> = ({
         setIsExiting(true);
 
         // Wait for exit animation to complete before calling onNext
-        const animationDuration = customVariants.exit.transition.duration * 1000; // 300ms from exit transition
+        const animationDuration = slideVariants.exit.transition.duration * 1000; // 300ms from exit transition
         setTimeout(() => {
             setIsVisible(false);
             // onSubmit(e);
@@ -261,14 +279,11 @@ export const FormComponent: React.FC<FormComponentProps> = ({
                 if (!isValidStudyInfo) {
                     return;
                 }
-                console.log(participantInfo, selectedStudy);
-                // onComplete(participantInfo, selectedStudy!);
                 break;
         }
 
         const tempStep = currentStep + 1;
         if (tempStep === 3) {
-            console.log("Form complete");
             handleSubmit();
             setFormComplete(true);
             return;
@@ -313,72 +328,100 @@ export const FormComponent: React.FC<FormComponentProps> = ({
         }
     };
 
-    // Use provided variants or default
-    const variants = customVariants || contentVariants;
+    // Get the appropriate animation variants based on the current step
+    const getVariantsForStep = () => {
+        // Use fade animation for the first step (IsMinorStep)
+        if (currentStep === 0) {
+            return fadeVariants;
+        }
+
+        if (currentStep === 1) {
+            return slideVariants;
+        }
+
+        if (currentStep === 2) {
+            return slideVariants;
+        }
+    };
 
     return (
-        (!formComplete) && (
-            <div className={cn("flex flex-col h-[600px] relative p-4", className)}>
-                {/* Stepper component at the top */}
-                {currentStep > 0 && (
-                    <div className="mt-2 mb-2">
+        <div className={cn("flex flex-col h-[600px] relative p-4 pt-16", className)}>
+            {currentStep > 0 && (
+                <AnimatePresence>
+                    {(!formComplete && stepOneComplete) && (
+                        <motion.div
+                            className="absolute top-0 left-0 p-4 pt-12 w-full"
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3, delay: 0.5 }}
+                    >
                         <Stepper
                             steps={stepsForStepper}
                             currentStep={currentStep - 1}
                             className="mb-2"
                         />
-                    </div>
-                )}
-                <form
-                    className="px-1 flex flex-col h-full overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                >
-                    {/* Scrollable content area with animation */}
-                    <AnimatePresence mode="wait">
-                        {isVisible && !isExiting && (
-                            <motion.div
-                                className="flex-1"
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                variants={variants}
-                                key={animationKey}
-                            >
-                                {renderStep()}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                    </motion.div>)}
+                </AnimatePresence>
+            )}
+            <AnimatePresence mode="wait">
+                {!formComplete ? (
+                    <motion.form
+                        className="px-1 flex flex-col h-full overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                        initial={{ opacity: 1 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: formExitDuration, ease: "easeInOut" }}
+                    >
+                        {/* Scrollable content area with animation */}
+                        <AnimatePresence mode="wait">
+                            {isVisible && !isExiting && (
+                                <motion.div
+                                    className="flex-1"
+                                    initial="enter"
+                                    animate="center"
+                                    exit="exit"
+                                    variants={getVariantsForStep()}
+                                    key={`${animationKey}-${currentStep}`}
+                                >
+                                    {renderStep()}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                    {/* Fixed footer with buttons - only shown when needed */}
-                    <AnimatePresence mode="wait">
-                        {showFooter && (
-                            <motion.div
-                                className="absolute bottom-0 p-4 left-0 right-0 flex justify-between w-full bg-primary/80 backdrop-blur-xs"
-                                initial="hidden"
-                                animate="visible"
-                                exit="exit"
-                                variants={footerVariants}
-                                key={footerAnimationKey}
-                            >
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => goBack()}
-                                    className="cursor-pointer bg-primary/70 hover:bg-primary/50 text-white"
+                        {/* Fixed footer with buttons - only shown when needed */}
+                        <AnimatePresence mode="wait">
+                            {showFooter && (
+                                <motion.div
+                                    className="absolute bottom-0 p-4 left-0 right-0 flex justify-between w-full bg-primary/80 backdrop-blur-xs"
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="exit"
+                                    variants={footerVariants}
+                                    key={footerAnimationKey}
                                 >
-                                    Back
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="primary"
-                                    className="cursor-pointer bg-secondary hover:bg-secondary/70"
-                                    onClick={() => goToNextStep()}
-                                >
-                                    {currentStep === steps.length - 1 ? "Submit" : "Next"}
-                                </Button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </form>
-            </div>
-        ));
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => goBack()}
+                                        className="cursor-pointer bg-primary/70 hover:bg-primary/50 text-white"
+                                    >
+                                        Back
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="primary"
+                                        className="cursor-pointer bg-secondary hover:bg-secondary/70"
+                                        onClick={() => goToNextStep()}
+                                    >
+                                        {currentStep === steps.length - 1 ? "Submit" : "Next"}
+                                    </Button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.form>
+                ) : null}
+            </AnimatePresence>
+        </div>
+    );
 };

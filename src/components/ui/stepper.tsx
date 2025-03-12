@@ -12,7 +12,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     return (
       <div 
         ref={ref} 
-        className={cn("w-full flex flex-col px-1", className)}
+        className={cn("w-full flex flex-col px-1 pb-2 bg-white", className)}
       >
         {/* Progress bars */}
         <div className="flex gap-2 w-full mb-2">

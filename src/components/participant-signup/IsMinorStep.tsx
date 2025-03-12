@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/Button';
-import { FormComponent } from '@/components/FormComponent';
 import { MinorInfoPage } from './MinorInfoPage';
 import {
   Tooltip,
@@ -8,26 +7,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-
-// Custom animation variants for this step
-const fadeVariants = {
-  enter: {
-    opacity: 0,
-  },
-  center: {
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      delay: 0.3,
-    },
-  },
-  exit: {
-    opacity: 0,
-    transition: {
-      duration: 0.5,
-    },
-  },
-};
 
 interface IsMinorStepProps {
   onNext: () => void;
@@ -92,13 +71,5 @@ export const IsMinorStep: React.FC<IsMinorStepProps> = ({ onNext }) => {
     ) : (
       <MinorInfoPage onBack={handleBackFromMinorInfo} />
     )
-    // <FormComponent
-    //   animationKey="is-minor-step"
-    //   customVariants={fadeVariants}
-    //   onSubmit={handleAdultSelect}
-    //   currentStep={0}
-    // >
-      
-    // </FormComponent>
   );
 }; 

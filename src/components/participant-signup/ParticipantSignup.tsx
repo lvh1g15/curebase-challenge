@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -57,7 +57,7 @@ export const ParticipantSignup: React.FC = () => {
                     Sign Up Participant
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md p-0 overflow-clip rounded-3xl">
+            <DialogContent className="max-w-md p-0 overflow-clip rounded-2xl border-1">
                 <VisuallyHidden>
                     <DialogHeader>
                         <DialogTitle>Participant Sign Up</DialogTitle>
